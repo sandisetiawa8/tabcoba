@@ -1,0 +1,73 @@
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.sliderheight {
+  width: 100%;
+  height: 400px;
+}
+
+.displayberita {
+  display: flex;
+}
+
+.popular {
+  margin: 40px;
+}
+
+.displayfoto {
+  height: 200px;
+  margin-top: 10px;
+  margin-right: 4px;
+}
+
+.displayvidio {
+  height: 200px;
+  margin-top: 10px;
+  margin-left: 4px;
+}
+
+@media screen and (max-width: 991.98px) {
+  .ketengah {
+    margin-left: auto;
+  }
+
+  section {
+    display: block;
+  }
+
+  .sliderheight {
+    display: block;
+    height: 250px;
+    width: 100%;
+  }
+
+  .displayberita {
+    display: block;
+  }
+
+  .popular {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .displayfoto {
+    display: inline-block;
+    flex-direction: row;
+    width: 100%;
+    height: 200px;
+    margin-top: 10px;
+    margin-right: 4px;
+  }
+
+  .displayvidio {
+    display: inline-block;
+    flex-direction: row;
+    width: 100%;
+    height: 200px;
+    margin-top: 10px;
+    margin-right: 4px;
+  }
+}
