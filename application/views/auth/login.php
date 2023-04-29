@@ -1,11 +1,11 @@
 
 	<div class="limiter">
-		<div class="container-login100" style="background-image: url('assets/img/galaxy2.jpeg');">
+		<div class="container-login100" style="background-image: url('assets/img/background.png');">
 			<div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-54">
             <span class="login100-form-title p-b-49">
 					<h6 style="font-family: 'Silkscreen', cursive;">SELAMAT DATANG</h6>
-					<h6 style="margin: 8px; font-family: 'Silkscreen', cursive;"">DI SIKAM JEJAMA</h6>
-					<h6 style="font-family: 'Silkscreen', cursive;"">Sistem Kendali Media Jejama</h6>
+					<h6 style="margin: 8px; font-family: 'Silkscreen', cursive;">DI TABUNGAN SISWA</h6>
+					<h6 style="font-family: 'Silkscreen', cursive;"">SD NEGERI 20 WAYLIMA</h6>
 				</span>
 
 				<?= $this->session->flashdata('message'); ?>
@@ -16,7 +16,7 @@
 						<span class="label-input100">Email</span>
 						<input class="input100" type="text" name="email" placeholder="Email" required value="<?= set_value('email'); ?>">
 						<span class="focus-input100" data-symbol="&#xf206;"></span>
-						<?= form_error('email', '<small class="text-danger pl-3">', '</small>'); ?>
+						<!-- <?= form_error('email', '<small class="text-danger pl-3">', '</small>'); ?> -->
 					</div>
 
 					<div class="wrap-input100 validate-input">

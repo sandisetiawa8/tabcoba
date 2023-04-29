@@ -17,7 +17,7 @@ class Auth extends CI_Controller
             redirect('user');
         };
 
-        $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
+        // $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
         $this->form_validation->set_rules('password', 'Password', 'trim|required');
 
         if ($this->form_validation->run() == false) {
@@ -37,16 +37,17 @@ class Auth extends CI_Controller
         $password = $this->input->post('password');
 
         $user = $this->db->get_where('user', ['email' => $email])->row_array();
+        $nis = $this->db->get_where('user', ['nis' => $email])->row_array();
 
         //usernya ada
-        if ($user) {
-            //usernya aktif
-            if ($user['is_active'] == 1) {
+        if ($user || $nis) {
                 //cek passwordnya
                 if (password_verify($password, $user['password'])) {
                     $data = [
                         'email' => $user['email'],
                         'role_id' => $user['role_id'],
+                        'nis' => $user['nis'],
+                        'kelas' => $user['kelas'],
                     ];
                     $this->session->set_userdata($data);
                     if ($user['role_id'] == 1) {
@@ -63,10 +64,8 @@ class Auth extends CI_Controller
                     $this->session->set_flashdata('error', 'Password yang anda masukan salah!');
                     redirect('auth');
                 }
-            } else {
-                $this->session->set_flashdata('error', 'Email belum diaktivasi!');
-                redirect('auth');
-            }
+           
+           
         } else {
             $this->session->set_flashdata('error', 'Email belum terdaftar!');
             redirect('auth');
@@ -81,54 +80,63 @@ class Auth extends CI_Controller
         }
 
         $this->form_validation->set_rules('name', 'Nama', 'required|trim');
-        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email|is_unique[user.email]', [
-            'is_unique' => 'Email sudah terdaftar'
-        ]);
-        $this->form_validation->set_rules(
-            'password1',
-            'Password',
-            'required|trim|min_length[3]|matches[password2]',
+        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email|is_unique[user.email]', 
             [
-                'matches' => 'Password Tidak Sama!',
-                'min_length' => 'Password Terlalu Pendek!',
-            ]
-        );
-
-        $this->form_validation->set_rules('password2', 'Password', 'required|trim|matches[password1]');
+            'is_unique' => 'Email Sudah Terdaftar.'
+            ]);
+        $this->form_validation->set_rules('nis', 'NIS', 'required|trim|is_unique[user.nis]', [
+            'is_unique' => 'NIS Sudah Terdaftar.'
+            ]);
+        $this->form_validation->set_rules(
+            'password','Password','required|trim|min_length[3]',
+            [
+                'min_length' => 'Password Terlalu Pendek.'
+            ]);
+        $this->form_validation->set_rules('kelas', 'Kelas', 'required|trim');
+        $this->form_validation->set_rules('agama', 'Agama', 'required|trim');
+        
 
         if ($this->form_validation->run() == false) {
             $data['title'] = 'User Registration';
             $this->load->view('templates/auth_header', $data);
             $this->load->view('auth/registration');
-            $this->load->view('templates/auth_footer');
+            // $this->load->view('templates/auth_footer');
         } else {
             $name = $this->input->post('name', true);
             $email = $this->input->post('email', true);
+            $nis = $this->input->post('nis', true);
+            $kelas = $this->input->post('kelas', true);
+            $agama = $this->input->post('agama', true);
             $data = [
                 'nama' => htmlspecialchars($name),
                 'email' => htmlspecialchars($email),
                 'image' => 'default.jpg',
-                'password' => password_hash($this->input->post('password1'), PASSWORD_DEFAULT),
+                'password' => password_hash($this->input->post('password'), PASSWORD_DEFAULT),
                 'role_id' => 2,
-                'is_active' => 0,
-                'date_created' => time()
-
+                'date_created' => time(),
+                'nis' => htmlspecialchars($nis),
+                'kelas' => htmlspecialchars($kelas),
+                'agama' => htmlspecialchars($agama),
+            ];
+            $data2 = [
+                'nis' => htmlspecialchars($nis)
             ];
 
             // siapkan token
-            $token = base64_encode(random_bytes(32));
-            $user_token = [
-                'email' => $email,
-                'token' => $token,
-                'date_created' => time()
-            ];
+            // $token = base64_encode(random_bytes(32));
+            // $user_token = [
+            //     'email' => $email,
+            //     'token' => $token,
+            //     'date_created' => time()
+            // ];
 
             $this->db->insert('user', $data);
-            $this->db->insert('user_token', $user_token);
+            $this->db->insert('keuangan', $data2);
+            // $this->db->insert('user_token', $user_token);
 
-            $this->sendEmail($token, 'verify');
+            // $this->sendEmail($token, 'verify');
 
-            $this->session->set_flashdata('success', 'Selamat akun anda berhasil dibuat, silahkan cek email untuk aktivasi akun.');
+            $this->session->set_flashdata('success', 'Selamat akun anda berhasil dibuat, silahkan login.');
             redirect('auth');
         }
     }

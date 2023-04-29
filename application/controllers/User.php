@@ -13,108 +13,70 @@ class User extends CI_Controller
         if($this->session->userdata('role_id') != "2"){
             redirect("Level_User");
         }
+        $this->load->helper('rupiah');
     }
+
 
     public function index()
     {
-        $data['title'] = 'My Profile';
-        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email',)])->row_array();
+
+            $data['title'] = 'Dashboard';
+            $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
+            $data['jumlah_user'] = $this->db->count_all('user');
+            $data['setoran_hari'] = $this->Model_admin->setoranku();
+            $data['penarikan_hari'] = $this->Model_admin->penarikanku();
+            $data['jumlah_semua'] = $this->Model_admin->total_tabunganku();    
+            
+            $this->load->view('templates/header', $data);
+            $this->load->view('templates/sidebaruser', $data);
+            $this->load->view('templates/topbaruser', $data);
+            $this->load->view('user/index', $data);
+            $this->load->view('templates/footer');
+
+    }
+
+    public function tabunganKu()
+    {
+        $data['title'] = 'Riwayat TabunganKu';
+        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
+        $data['jumlah_semua'] = $this->Model_admin->total_tabunganku();    
+        $data['hasil'] = $this->db->get_where('keuangan', ['nis' => $this->session->userdata('nis')])->result_array();
 
         $this->load->view('templates/header', $data);
         $this->load->view('templates/sidebaruser', $data);
         $this->load->view('templates/topbaruser', $data);
-        $this->load->view('user/index', $data);
-        $this->load->view('templates/footer');
+        $this->load->view('user/tabunganku', $data);
     }
 
-    public function formkerjasama()
+    public function cetak_riwayat_tabungan()
     {
-        $this->form_validation->set_rules('namamedia', 'Namamedia', 'required|trim');
-        $this->form_validation->set_rules('kabiro', 'Kabiro', 'required|trim');
-        $this->form_validation->set_rules('pimred', 'Pimred', 'required|trim');
-        $this->form_validation->set_rules('namaperusahaan', 'Namaperusahaan', 'required|trim');
-        $this->form_validation->set_rules('alamat', 'Alamat', 'required|trim');
-        $this->form_validation->set_rules('npwp', 'Npwp', 'required|trim');
-        $this->form_validation->set_rules('rekening', 'Rekening', 'required|trim');
-        $this->form_validation->set_rules('siup', 'Siup', 'required|trim');
-        $this->form_validation->set_rules('keterangan', 'Keterangan', 'required|trim');
-        // $this->form_validation->set_rules('file', 'File', 'required|trim');
-
-        if ($this->form_validation->run() == false) {
-            $data['title'] = 'Form Pengajuan Kerjasama';
-            $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email',)])->row_array();
-    
-            $this->load->view('templates/header', $data);
-            $this->load->view('templates/sidebaruser', $data);
-            $this->load->view('templates/topbaruser', $data);
-            $this->load->view('user/formKerjasama', $data);
-            $this->load->view('templates/footer');
-        } else {
-            $config['upload_path']          = FCPATH.'/assets/file/softcopy/';
-            $config['allowed_types']        = 'doc|docx|pdf';
-            $config['max_size']             = 100000;
-            $config['max_width']            = 1024;
-            $config['max_height']           = 768;
-
-            $this->load->library('upload', $config);
-
-            if($this->upload->do_upload('file')) {
-                $new_file = $this->upload->data('file_name');
-                $rek = $this->input->post('bank');
-                $no = $this->input->post('rekening');
-                $gabung = $rek. ": ". $no;
-                $data = [
-                    'email' => $this->input->post('email', true),
-                    'nama_media' => htmlspecialchars($this->input->post('namamedia', true)),
-                    'kabiro' => $this->input->post('kabiro', true),
-                    'pimred' => $this->input->post('pimred', true),
-                    'nama_perusahaan' => $this->input->post('namaperusahaan', true),
-                    'alamat' => $this->input->post('alamat', true),
-                    'npwp' => $this->input->post('npwp', true),
-                    'no_rek' => $gabung,
-                    'no_siup' => $this->input->post('siup', true),
-                    'keterangan' => $this->input->post('keterangan', true),
-                    'file' => $new_file,
-                    'tgl_pengajuan' => time(),
-                    'status' => 'Menunggu'
-                ];
-
-                $this->db->insert('tb_proposal', $data);
-
-                $this->session->set_flashdata('success', 'Proposal Berhasil diajukan');
-                redirect('user/formkerjasama');
-            }else{
-                echo $this->upload->display_errors();
-            }
-
-            
-            
-        }
-    
+        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
+        $data['jumlah_semua'] = $this->Model_admin->total_tabunganku();    
+        $data['hasil'] = $this->db->get_where('keuangan', ['nis' => $this->session->userdata('nis')])->result_array();
+       
+        $this->load->view('user/riwayat_tabungan', $data);
     }
 
-    public function editprofile()
+    public function myprofile()
     {
-            $data['title'] = 'Edit Profile';
-            $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email',)])->row_array();
+        $data['title'] = 'Profile Saya';
+        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
+        $data['ortu'] = $this->db->get_where('ortu', ['nis' => $this->session->userdata('nis')])->row_array();
+       
+
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/sidebaruser', $data);
+        $this->load->view('templates/topbaruser', $data);
+        $this->load->view('user/my_profile', $data);
+        // $this->load->view('templates/footer');
+    }
+
+    public function proses_ubah_foto()
+    {
         
-            $this->form_validation->set_rules('name', 'full name', 'required|trim');
-
-            if ($this->form_validation->run() == false) {
-            $this->load->view('templates/header', $data);
-            $this->load->view('templates/sidebaruser', $data);
-            $this->load->view('templates/topbaruser', $data);
-            $this->load->view('editprofile', $data);
-            $this->load->view('templates/footer');
-            } else {
-                $name = $this->input->post('name');
-                $email = $this->input->post('email');
-
-                // Jika ada gambar yang di upload
-                // $upload_image = $_FILES['image']['name'];
-                // if ($upload_image) {
+                $nis = $this->input->post('nis');
                     $config['upload_path']          = FCPATH.'/assets/img/profile/';
-                    $config['allowed_types']        = 'jpg|jpeg|png';
+                    $config['allowed_types']        = 'jpg|png|jpeg';
                     $config['max_size']             = 100000;
                     $config['max_width']            = 1024;
                     $config['max_height']           = 768;
@@ -122,83 +84,71 @@ class User extends CI_Controller
 
                     $this->load->library('upload', $config);
                     
-
-                    if($this->upload->do_upload('image')) {
+                    if($this->upload->do_upload('image') == true) {
                         $new_image = $this->upload->data('file_name');
                         $this->db->set('image', $new_image);
-                        $this->db->set('nama', $name);
-                        $this->db->where('email', $email);
+                        $this->db->where('nis', $nis);
                         $this->db->update('user');
 
-                        $this->session->set_flashdata('success', 'Profile berhasil di Update');
-                        redirect('user');
-                    }else{
+                        $this->session->set_flashdata('success', 'Profile berhasil di Ubah');
+                        redirect('user/myprofile');
+                    }else {
                         echo $this->upload->display_errors();
-                    }
-                // }
-
-                
-            }
+                    };
+    
     }
 
+   public function proses_ubah_profile()
+   {
+    $id = $this->input->post('id');
+    $nama = $this->input->post('nama');
+    $nis = $this->input->post('nis');
+    $tgl_lahir = $this->input->post('tgl_lahir');
+    $tmp_lahir = $this->input->post('tmp_lahir');
+    $jk = $this->input->post('jk');
+    $alamat = $this->input->post('alamat');
+    $agama = $this->input->post('agama');
+    $kelas = $this->input->post('kelas');
+    
+    
+    $this->db->set('nama', $nama);
+    $this->db->set('nis', $nis);
+    $this->db->set('tgl_lahir', $tgl_lahir);
+    $this->db->set('tmp_lahir', $tmp_lahir);
+    $this->db->set('jk', $jk);
+    $this->db->set('alamat', $alamat);
+    $this->db->set('agama', $agama);
+    $this->db->set('kelas', $kelas);
+    $this->db->where('id', $id);
+    $this->db->update('user');
 
-    public function ubahpassword()
-    {
-        $data['title'] = 'Ubah Password';
-        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email','password')])->row_array();
+    $this->session->set_flashdata('success', 'Berhasil Mengubah Data.');
+    redirect('user/myprofile');
+   }
 
-        $this->form_validation->set_rules('pass_lama', 'Password lama', 'required|trim');
-        $this->form_validation->set_rules('pass_baru', 'Password baru', 'required|trim|min_length[3]|matches[ulang_pass]');
-        $this->form_validation->set_rules('ulang_pass', 'Confirm New Password', 'required|trim|min_length[3]|matches[pass_baru]');
+   public function proses_ubah_ortu()
+   {
+    $id = $this->input->post('id');
+    $ayah = $this->input->post('ayah');
+    $ibu = $this->input->post('ibu');
+    $alamat = $this->input->post('alamat');
+    $pek_ayah = $this->input->post('pek_ayah');
+    $pek_ibu = $this->input->post('pek_ibu');
+    $no_hp = $this->input->post('no_hp');
+   
+    
+    $this->db->set('ayah', $ayah);
+    $this->db->set('ibu', $ibu);
+    $this->db->set('alamat', $alamat);
+    $this->db->set('pek_ayah', $pek_ayah);
+    $this->db->set('pek_ibu', $pek_ibu);
+    $this->db->set('no_hp', $no_hp);
+    $this->db->where('id', $id);
+    $this->db->update('ortu');
 
-        if($this->form_validation->run() == false) {
-            $this->load->view('templates/header', $data);
-            $this->load->view('templates/sidebaruser', $data);
-            $this->load->view('templates/topbaruser', $data);
-            $this->load->view('ubahpassword', $data);
-            $this->load->view('templates/footer');
-        } else  {
-            
-            $email = $this->input->post('email');
-            $pass_lama = $this->input->post('pass_lama');
-            $pass_baru = $this->input->post('pass_baru');
-            if(!password_verify($pass_lama, $data['user']['password'])) {
-                $this->session->set_flashdata('error', 'Password Yang anda masukan salah');
-                redirect('user/ubahpassword');
-            } else {
-                if($pass_lama == $pass_baru) {
-                $this->session->set_flashdata('error', 'Password yang anda masukan sama seperti password sebelumnya');
-                redirect('user/ubahpassword');
-                } else {
-                    // jika password sudah bener
-                    $password_hash = password_hash($pass_baru, PASSWORD_DEFAULT);
-
-                    $data = array('password' => $password_hash);
-
-                    $this->db->set('password', $password_hash);
-                    $this->db->where('email', $email);
-                    $this->db->update('user');
-
-                    $this->session->set_flashdata('success', 'Password berhasil di Update');
-                    redirect('user');
-                }
-            }
-        }
-    }
-
-
-    public function proposalsaya() 
-    {
-        $data['title'] = 'Proposal Saya';
-        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
-        $data['hasil'] =  $this->db->get_where('tb_proposal', ['email' => $this->session->userdata('email')])->result_array();
-
-        $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebaruser', $data);
-        $this->load->view('templates/topbaruser', $data);
-        $this->load->view('user/proposalsaya', $data);
-        // $this->load->view('templates/footer'); 
-    }
+    $this->session->set_flashdata('success', 'Berhasil Mengubah Data.');
+    redirect('user/myprofile');
+   }
 
 
 }

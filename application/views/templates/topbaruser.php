@@ -11,6 +11,7 @@
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
+                    <h5 class="h3 mb-4 text-gray-800 col-sm-8 title mt-4 ms-3" style="font-size: 25px;"><?= $title; ?></h5>
 
                     
                     <!-- Topbar Navbar -->
@@ -28,7 +29,7 @@
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="<?= base_url('user'); ?>">
+                                <a class="dropdown-item" href="<?= base_url('user/myprofile'); ?>">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
                                 </a>
